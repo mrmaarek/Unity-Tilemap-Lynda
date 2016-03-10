@@ -35,8 +35,15 @@ public class TileMapEditor : Editor
             ReCalculate();
         }
 
-
+        var oldTexture = map.texture2D;
         map.texture2D = (Texture2D)EditorGUILayout.ObjectField("Texture 2D:", map.texture2D, typeof(Texture2D), false);
+
+        if (oldTexture != map.texture2D)
+        {
+            ReCalculate();
+            map.tileID = 1;
+            CreateBrush();
+        }
 
         if (map.texture2D == null)
         {
@@ -50,6 +57,14 @@ public class TileMapEditor : Editor
 
             //Update the Brush from the Tilemap
             UpdateBrush(map.currentTileBrush);
+
+            if (GUILayout.Button("Clear Tiles"))
+            {
+                if (EditorUtility.DisplayDialog("Clear all the tilemaps tiles?", "Are you sure?", "Yes", "No"))
+                {
+                    ClearTileMap();
+                }
+            }
         }
 
         EditorGUILayout.EndVertical();
@@ -59,6 +74,15 @@ public class TileMapEditor : Editor
     {
         map = target as TileMap;
         Tools.current = Tool.View;
+
+        if (map.tiles == null)
+        {
+            GameObject go = new GameObject("Tiles");
+            go.transform.SetParent(map.transform);
+            go.transform.position = Vector3.zero;
+
+            map.tiles = go;
+        }
 
         if (map.texture2D != null)
         {
@@ -78,6 +102,19 @@ public class TileMapEditor : Editor
         {
             UpdateHitPosition();
             MoveBrush();
+            
+            if (map.texture2D != null && mouseOnMap)
+            {
+                Event current = Event.current;
+                if (current.shift)
+                {
+                    DrawTile();
+                }
+                else if (current.alt)
+                {
+                    EraseTile();
+                }
+            }
         }
     }
 
@@ -112,6 +149,8 @@ public class TileMapEditor : Editor
             brush = go.AddComponent<TileBrush>();
             // Add a spriterenderer to the GO
             brush.renderedSprite = go.AddComponent<SpriteRenderer>();
+            // Just to be sure that the brush is staying over the already placed tiles.
+            brush.renderedSprite.sortingOrder = 1000;
             // Reference to the Brushsize based on the pixels to units from the Tilemap.
             int pixelsToUnits = map.pixelsToUnits;
             
@@ -188,4 +227,48 @@ public class TileMapEditor : Editor
 
         brush.transform.position = new Vector3(x, y, map.transform.position.z);
     }
+
+    private void DrawTile()
+    {
+        // Get the ID from the brush.
+        string id = brush.tileID.ToString();
+
+        var posX = brush.transform.position.x;
+        var posY = brush.transform.position.y;
+
+        // Check if there is a tile with the same name
+        GameObject tile = GameObject.Find(map.name + "/Tiles/tile_" + id);
+        if (tile = null)
+        {
+            tile = new GameObject("tile_" + id);
+            tile.transform.SetParent(map.tiles.transform);
+            tile.transform.position = new Vector3(posX, posY, 0);
+            tile.AddComponent<SpriteRenderer>();
+        }
+
+        tile.GetComponent<SpriteRenderer>().sprite = brush.renderedSprite.sprite;
+    }
+
+    private void EraseTile()
+    {
+        string id = brush.tileID.ToString();
+        GameObject tile = GameObject.Find(map.name + "/Tiles/tile_" + id);
+
+        if (tile != null)
+        {
+            DestroyImmediate(tile);
+        }
+    }
+
+    private void ClearTileMap()
+    {
+        for (int i = 0; i < map.tiles.transform.childCount; i++)
+        {
+            Transform transform = map.tiles.transform.GetChild(i);
+            DestroyImmediate(transform.gameObject);
+            i--;
+        }
+    }
+
+
 }

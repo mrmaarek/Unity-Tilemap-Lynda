@@ -57,8 +57,6 @@ public class TilePickerWindow : EditorWindow
                 var selectionPos = new Vector2(tile.x * currentSelection.x + offSet.x,
                                                tile.y * currentSelection.y + offSet.y);
 
-                
-
                 var boxTex = new Texture2D(1, 1);
                 boxTex.SetPixel(0, 0, new Color(0, 0.5f, 1f, 0.4f));
                 boxTex.Apply();

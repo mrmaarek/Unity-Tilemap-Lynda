@@ -15,6 +15,8 @@ public class TileMap : MonoBehaviour
     public int pixelsToUnits = 100;
     public int tileID = 0;
 
+    public GameObject tiles;
+
     //Get the current tile brush
     public Sprite currentTileBrush
     {
