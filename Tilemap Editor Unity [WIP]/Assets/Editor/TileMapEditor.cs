@@ -236,23 +236,27 @@ public class TileMapEditor : Editor
         var posX = brush.transform.position.x;
         var posY = brush.transform.position.y;
 
+        
+
         // Check if there is a tile with the same name
-        GameObject tile = GameObject.Find(map.name + "/Tiles/tile_" + id);
-        if (tile = null)
+        GameObject tile = GameObject.Find(map.name + "/Tiles/Tile_" + id);
+
+        Debug.Log(tile);
+        if (tile == null)
         {
             tile = new GameObject("tile_" + id);
             tile.transform.SetParent(map.tiles.transform);
             tile.transform.position = new Vector3(posX, posY, 0);
             tile.AddComponent<SpriteRenderer>();
         }
-
+        Debug.Log(brush.renderedSprite.sprite);
         tile.GetComponent<SpriteRenderer>().sprite = brush.renderedSprite.sprite;
     }
 
     private void EraseTile()
     {
         string id = brush.tileID.ToString();
-        GameObject tile = GameObject.Find(map.name + "/Tiles/tile_" + id);
+        GameObject tile = GameObject.Find(map.name + "/Tiles/Tile_" + id);
 
         if (tile != null)
         {
